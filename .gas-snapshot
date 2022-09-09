@@ -1,1 +1,3 @@
-GreeterTest:testSetGm() (gas: 107402)
+LinearVRGDATest:testAlwaysTargetPriceInRightConditions(uint256) (runs: 1000, μ: 11110, ~: 11110)
+LinearVRGDATest:testPricingBasic() (gas: 10920)
+LinearVRGDATest:testTargetPrice() (gas: 11759)
