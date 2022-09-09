@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   tests:
-    name: Forge Testing
+    name: tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -41,7 +41,7 @@ jobs:
       - name: Check gas snapshots
         run: forge snapshot --check
 
-  slither:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -60,9 +60,9 @@ jobs:
       - name: Check contract sizes
         run: forge build --sizes
 
-      - name: Run Slither
-        uses: crytic/slither-action@main
-        id: slither
-        with:
-          target: '.'
-          slither-args: '--exclude solc-version,pragma,unused-state --exclude-dependencies'
+      # - name: Run Slither
+      #   uses: crytic/slither-action@main
+      #   id: slither
+      #   with:
+      #     target: '.'
+      #     slither-args: '--exclude solc-version,pragma,unused-state --exclude-dependencies'
