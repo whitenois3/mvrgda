@@ -1,4 +1,4 @@
-<img align="right" width="150" height="150" top="100" src="./assets/mvrgda.png">
+<img align="right" width="150" height="150" top="100" src="./assets/rosie.png">
 
 # mvrgda • [![ci](https://github.com/whitenois3/mvrgda/actions/workflows/ci.yml/badge.svg)](https://github.com/whitenois3/mvrgda/actions/workflows/ci.yml) ![license](https://img.shields.io/github/license/whitenois3/mvrgda?label=license) ![solidity](https://img.shields.io/badge/solidity-^0.8.15-lightgrey)
 

@@ -23,7 +23,7 @@ contract LinearVRGDATest is DSTestPlus {
         // Warp to the target sale time so that the VRGDA price equals the target price.
         hevm.warp(block.timestamp + fromDaysWadUnsafe(mvrgda.getTargetSaleTime(1e18)));
 
-        uint256 cost = mvrgda.getVRGDAPrice(toDaysWadUnsafe(block.timestamp), 0);
+        uint256 cost = uint256(mvrgda.getVRGDAPrice(toDaysWadUnsafe(block.timestamp), 0));
         assertRelApproxEq(cost, uint256(mvrgda.targetPrice()), 0.00001e18);
     }
 
@@ -34,7 +34,7 @@ contract LinearVRGDATest is DSTestPlus {
 
         hevm.warp(block.timestamp + timeDelta);
 
-        uint256 cost = mvrgda.getVRGDAPrice(toDaysWadUnsafe(block.timestamp), numMint);
+        uint256 cost = uint256(mvrgda.getVRGDAPrice(toDaysWadUnsafe(block.timestamp), numMint));
         assertRelApproxEq(cost, uint256(mvrgda.targetPrice()), 0.00001e18);
     }
 
@@ -42,7 +42,7 @@ contract LinearVRGDATest is DSTestPlus {
         sold = bound(sold, 0, type(uint128).max);
 
         assertRelApproxEq(
-            mvrgda.getVRGDAPrice(mvrgda.getTargetSaleTime(toWadUnsafe(sold + 1)), sold),
+            uint256(mvrgda.getVRGDAPrice(mvrgda.getTargetSaleTime(toWadUnsafe(sold + 1)), sold)),
             uint256(mvrgda.targetPrice()),
             0.00001e18
         );

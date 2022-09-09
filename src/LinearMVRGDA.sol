@@ -41,7 +41,7 @@ abstract contract LinearMVRGDA is MVRGDA {
 
     /// @notice Get the current amount of reserves.
     /// @return The current reserves, scaled by 1e18.
-    function getCurrentReserves() public view override returns (uint256) {
-        return address(this).balance;
+    function getCurrentReserves() public view override returns (int256) {
+        return int256(address(this).balance);
     }
 }

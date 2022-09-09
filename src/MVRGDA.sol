@@ -39,8 +39,8 @@ abstract contract MVRGDA {
     /// @param sold The total number of tokens that have been sold so far.
     /// @return The price of a token according to VRGDA, scaled by 1e18.
     function getVRGDAPrice(int256 timeSinceStart, uint256 sold) public view virtual returns (int256) {
-        uint256 rawVRGDAPrice = getRawVRGDAPrice(timeSinceStart, sold);
-        return int256(rawVRGDAPrice) - int256(getPushback(rawVRGDAPrice));
+        int256 rawVRGDAPrice = int256(getRawVRGDAPrice(timeSinceStart, sold));
+        return rawVRGDAPrice - int256(getPushback(rawVRGDAPrice, sold));
     }
 
     /// @notice Calculate the raw price of a token according to the VRGDA formula.
@@ -62,7 +62,7 @@ abstract contract MVRGDA {
     /// @param currentPrice The current VRGDA price of a token, scaled by 1e18.
     /// @param sold The total number of tokens that have been sold so far.
     /// @return The amount of reserve to pushback, scaled by 1e18.
-    function getPushback(uint256 currentPrice, uint256 sold) public view virtual returns (uint256) {
+    function getPushback(int256 currentPrice, uint256 sold) public view virtual returns (int256) {
         // constraint: pushback <= targetPrice - currentPrice
         if (currentPrice > targetPrice) {
             return 0;
@@ -71,14 +71,14 @@ abstract contract MVRGDA {
         /// ~~ Pushback formulae ~~
         /// uint256 delta = targetPrice - currentPrice;
         /// uint256 priceDifferential = delta / targetPrice;
-        /// uint256 reflexivePriceGivenCurrentReserves = getCurrentReserves() / sold;
+        /// uint256 reflexivePriceGivenCurrentReserves = getCurrentReserves() / (sold + 1);
         /// uint256 pushback = reflexivePriceGivenCurrentReserves * priceDifferential;
         ///
         /// ~~ Inlined ~~
-        /// uint256 pushback = (getCurrentReserves() * (targetPrice - currentPrice)) / (targetPrice * sold)
+        /// uint256 pushback = (getCurrentReserves() * (targetPrice - currentPrice)) / (targetPrice * (sold+1))
 
         // Use a reflexive price calculation and scale the pushback by the current reserves
-        return wadDiv(wadMul(getCurrentReserves(), targetPrice - currentPrice), wadMul(sold, targetPrice));
+        return wadDiv(wadMul(getCurrentReserves(), targetPrice - currentPrice), wadMul(int256(sold + 1), targetPrice));
     }
 
     /// @notice Given a number of tokens sold, return the target time that number of tokens should be sold by.
@@ -89,5 +89,5 @@ abstract contract MVRGDA {
 
     /// @notice Get the current amount of reserves.
     /// @return The current reserves, scaled by 1e18.
-    function getCurrentReserves() public view virtual returns (uint256);
+    function getCurrentReserves() public view virtual returns (int256);
 }

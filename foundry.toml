@@ -2,7 +2,11 @@
 solc_version = '0.8.15'
 auto_detect_solc = false
 optimizer_runs = 1_000
-
+remappings = [
+    "solmate/=lib/solmate/src/",
+    "forge-std/=lib/forge-std/src/",
+    "VRGDAs/=lib/VRGDAs/src/"
+]
 [fuzz]
 runs = 1_000
 
