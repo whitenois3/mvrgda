@@ -7,7 +7,7 @@ Variable Rate Gradual Dutch Auctions with Martingale Correction.
 
 ### Why?
 
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Idea: adjust VRGDA to produce negative prices.<br><br>That&#39;s right, pay the users to mint.<br><br>&quot;But why?&quot;<br><br>↓</p>&mdash; WINTΞR 💙💛 (@w1nt3r_eth) <a href="https://twitter.com/w1nt3r_eth/status/1568039897617014785?ref_src=twsrc%5Etfw">September 9, 2022</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Idea: adjust VRGDA to produce negative prices.<br><br>That&#39;s right, pay the users to mint.<br><br>&quot;But why?&quot;<br><br>↓</p>&mdash; WINTΞR 💙💛 (@w1nt3r_eth) <a href="https://twitter.com/w1nt3r_eth/status/1568039897617014785?ref_src=twsrc%5Etfw">September 9, 2022</a></blockquote>
 
 
 Variable Rate Gradual Dutch Auctions are a novel token issuance mechanism that excel at letting you sell tokens close to a custom schedule over time by raising prices when sales are ahead of schedule and lowering prices when sales are behind schedule.
@@ -43,10 +43,9 @@ lib
 ├─ VRGDAs — https://github.com/transmissions11/VRGDAs
 ├─ forge-std — https://github.com/foundry-rs/forge-std
 ├─ solmate — https://github.com/transmissions11/solmate
-scripts
-├─ Deploy.s.sol — Deployment Script
 src
-├─ MVRGDA — A Variable Rate Gradual Dutch Auction with Martingale Correction
+├─ LinearMVRGDA — An instantiable Linear VRGDA with Martingale Price Correction
+├─ MVRGDA — A Variable Rate Gradual Dutch Auction with Martingale Price Correction
 test
 └─ ...
 ```

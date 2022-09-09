@@ -1,60 +1,93 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import { ERC721 } from "solmate/tokens/ERC721.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
+import { wadExp, wadDiv, wadLn, wadMul, unsafeWadMul, toWadUnsafe } from "solmate/utils/SignedWadMath.sol";
 
-import { toDaysWadUnsafe, toWadUnsafe } from "solmate/utils/SignedWadMath.sol";
-
-import { LogisticVRGDA } from "../LogisticVRGDA.sol";
-
-/// @title Martingale VRGDA ERC721 Token
+/// @title VRGDA with Martingale Price Correction
 /// @author asnared <https://github.com/abigger87>
 /// @notice Adapted from transmissions11 <t11s@paradigm.xyz>
 /// @notice Adapted from FrankieIsLost <frankie@paradigm.xyz>
-/// @notice You should use in production. Not Financial Advice.
-abstract contract MVRGDA is ERC721, LogisticVRGDA {
-    /// @notice The maximum number of mintable tokens
-    uint256 public constant MAX_MINTABLE = 100;
+/// @notice Something Something Recommend Using Something Financial Advice
+abstract contract MVRGDA {
 
-    /// @notice The total number of tokens sold thus far
-    uint256 public totalSold;
+    /// [[[[[[[[[[[[[[[[[[[[[[  VRGDA PARAMETERS  ]]]]]]]]]]]]]]]]]]]]]]
 
-    /// @notice The start time, immutably set to the deployment timestamp
-    uint256 public immutable startTime = block.timestamp;
+    /// @notice Target price for a token, to be scaled according to sales pace.
+    /// @dev Represented as an 18 decimal fixed point number.
+    int256 public immutable targetPrice;
 
-    constructor()
-        ERC721(
-            "Example Logistic NFT", // Name.
-            "LOGISTIC" // Symbol.
-        )
-        LogisticVRGDA(
-            69.42e18, // Target price.
-            0.31e18, // Price decay percent.
-            // Maximum # mintable/sellable.
-            toWadUnsafe(MAX_MINTABLE),
-            0.1e18 // Time scale.
-        )
-    {}
+    /// @dev Precomputed constant that allows us to rewrite a pow() as an exp().
+    /// @dev Represented as an 18 decimal fixed point number.
+    int256 internal immutable decayConstant;
 
-    /// @notice Mint a new token.
-    function mint() external payable returns (uint256 mintedId) {
+    /// @notice Sets target price and per time unit price decay for the VRGDA.
+    /// @param _targetPrice The target price for a token if sold on pace, scaled by 1e18.
+    /// @param _priceDecayPercent The percent price decays per unit of time with no sales, scaled by 1e18.
+    constructor(int256 _targetPrice, int256 _priceDecayPercent) {
+        targetPrice = _targetPrice;
+
+        decayConstant = wadLn(1e18 - _priceDecayPercent);
+
+        // The decay constant must be negative for VRGDAs to work.
+        require(decayConstant < 0, "NON_NEGATIVE_DECAY_CONSTANT");
+    }
+
+    /// [[[[[[[[[[[[[[[[[[[[[[[[[  PRICE LOGIC  ]]]]]]]]]]]]]]]]]]]]]]]]]
+
+    /// @notice Calculate the price of a token according to the VRGDA formula.
+    /// @param timeSinceStart Time passed since the VRGDA began, scaled by 1e18.
+    /// @param sold The total number of tokens that have been sold so far.
+    /// @return The price of a token according to VRGDA, scaled by 1e18.
+    function getVRGDAPrice(int256 timeSinceStart, uint256 sold) public view virtual returns (int256) {
+        uint256 rawVRGDAPrice = getRawVRGDAPrice(timeSinceStart, sold);
+        return int256(rawVRGDAPrice) - int256(getPushback(rawVRGDAPrice));
+    }
+
+    /// @notice Calculate the raw price of a token according to the VRGDA formula.
+    /// @param timeSinceStart Time passed since the VRGDA began, scaled by 1e18.
+    /// @param sold The total number of tokens that have been sold so far.
+    /// @return The price of a token according to VRGDA, scaled by 1e18.
+    function getRawVRGDAPrice(int256 timeSinceStart, uint256 sold) public view virtual returns (uint256) {
         unchecked {
-            // Note: By using toDaysWadUnsafe(block.timestamp - startTime) we are establishing that 1 "unit of time" is 1 day.
-            uint256 price = getVRGDAPrice(toDaysWadUnsafe(block.timestamp - startTime), mintedId = totalSold++);
-
-            require(msg.value >= price, "UNDERPAID"); // Don't allow underpaying.
-
-            _mint(msg.sender, mintedId); // Mint the NFT using mintedId.
-
-            // Note: We do this at the end to avoid creating a reentrancy vector.
-            // Refund the user any ETH they spent over the current price of the NFT.
-            // Unchecked is safe here because we validate msg.value >= price above.
-            SafeTransferLib.safeTransferETH(msg.sender, msg.value - price);
+            return uint256(wadMul(targetPrice, wadExp(unsafeWadMul(decayConstant,
+                // Theoretically calling toWadUnsafe with sold can silently overflow but under
+                // any reasonable circumstance it will never be large enough. We use sold + 1 as
+                // the VRGDA formula's n param represents the nth token and sold is the n-1th token.
+                timeSinceStart - getTargetSaleTime(toWadUnsafe(sold + 1))
+            ))));
         }
     }
 
-    /// @notice The Token URI for a given token id.
-    /// @return uri The token uri
-    function tokenURI(uint256) public pure override returns (string memory);
+    /// @notice Calculate the reserve pushback amount for a token sale.
+    /// @param currentPrice The current VRGDA price of a token, scaled by 1e18.
+    /// @param sold The total number of tokens that have been sold so far.
+    /// @return The amount of reserve to pushback, scaled by 1e18.
+    function getPushback(uint256 currentPrice, uint256 sold) public view virtual returns (uint256) {
+        // constraint: pushback <= targetPrice - currentPrice
+        if (currentPrice > targetPrice) {
+            return 0;
+        }
+
+        /// ~~ Pushback formulae ~~
+        /// uint256 delta = targetPrice - currentPrice;
+        /// uint256 priceDifferential = delta / targetPrice;
+        /// uint256 reflexivePriceGivenCurrentReserves = getCurrentReserves() / sold;
+        /// uint256 pushback = reflexivePriceGivenCurrentReserves * priceDifferential;
+        ///
+        /// ~~ Inlined ~~
+        /// uint256 pushback = (getCurrentReserves() * (targetPrice - currentPrice)) / (targetPrice * sold)
+
+        // Use a reflexive price calculation and scale the pushback by the current reserves
+        return wadDiv(wadMul(getCurrentReserves(), targetPrice - currentPrice), wadMul(sold, targetPrice));
+    }
+
+    /// @notice Given a number of tokens sold, return the target time that number of tokens should be sold by.
+    /// @param sold A number of tokens sold, scaled by 1e18, to get the corresponding target sale time for.
+    /// @return The target time the tokens should be sold by, scaled by 1e18, where the time is
+    /// relative, such that 0 means the tokens should be sold immediately when the VRGDA begins.
+    function getTargetSaleTime(int256 sold) public view virtual returns (int256);
+
+    /// @notice Get the current amount of reserves.
+    /// @return The current reserves, scaled by 1e18.
+    function getCurrentReserves() public view virtual returns (uint256);
 }
