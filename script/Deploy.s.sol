@@ -1,18 +1,17 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.15;
 
-import {Script} from 'forge-std/Script.sol';
+import { Script } from 'forge-std/Script.sol';
 
-import {Greeter} from "src/Greeter.sol";
+import { MVRGDA } from "src/MVRGDA.sol";
 
 /// @notice A very simple deployment script
 contract Deploy is Script {
-
   /// @notice The main script entrypoint
-  /// @return greeter The deployed contract
-  function run() external returns (Greeter greeter) {
+  /// @return mvrgda The deployed contract
+  function run() external returns (MVRGDA mvrgda) {
     vm.startBroadcast();
-    greeter = new Greeter("GM");
+    mvrgda = new MVRGDA();
     vm.stopBroadcast();
   }
 }

@@ -1,117 +1,68 @@
-<img align="right" width="150" height="150" top="100" src="./assets/readme.jpg">
+<img align="right" width="150" height="150" top="100" src="./assets/mvrgda.png">
 
-# femplate • [![ci](https://github.com/abigger87/femplate/actions/workflows/ci.yml/badge.svg)](https://github.com/abigger87/femplate/actions/workflows/ci.yml) ![license](https://img.shields.io/github/license/abigger87/femplate?label=license) ![solidity](https://img.shields.io/badge/solidity-^0.8.15-lightgrey)
+# mvrgda • [![ci](https://github.com/whitenois3/mvrgda/actions/workflows/ci.yml/badge.svg)](https://github.com/whitenois3/mvrgda/actions/workflows/ci.yml) ![license](https://img.shields.io/github/license/whitenois3/mvrgda?label=license) ![solidity](https://img.shields.io/badge/solidity-^0.8.15-lightgrey)
 
-A **Clean**, **Robust** Template for Foundry Projects.
+Variable Rate Gradual Dutch Auctions with Martingale Correction.
 
-## Getting Started
 
-Click [`use this template`](https://github.com/abigger87/femplate/generate) to create a new repository with this repo as the initial state.
+### Why?
 
-Or, if your repo already exists, run:
-```sh
-forge init --template https://github.com/abigger87/femplate
-git submodule update --init --recursive
-forge install
-```
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Idea: adjust VRGDA to produce negative prices.<br><br>That&#39;s right, pay the users to mint.<br><br>&quot;But why?&quot;<br><br>↓</p>&mdash; WINTΞR 💙💛 (@w1nt3r_eth) <a href="https://twitter.com/w1nt3r_eth/status/1568039897617014785?ref_src=twsrc%5Etfw">September 9, 2022</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-Run `./utils/rename.sh` to rename all instances of `femplate` with the name of your project/repository.
+
+Variable Rate Gradual Dutch Auctions are a novel token issuance mechanism that excel at letting you sell tokens close to a custom schedule over time by raising prices when sales are ahead of schedule and lowering prices when sales are behind schedule.
+
+But, while the price may be _lowered_ over time, it may always be floored at zero. Additionally - there is one more static variable that is considered fixed, but may be made dynamic. More on this later.
+
+Consider the following scenario:
+
+You are issuing 672 gulags at an intended issuance of 1 gulag per hour for a total of one month - or precisely, 28 days (4 weeks).
+
+
+// TODO: fix: supply may be infinite in VRGDAs
+// TODO: key here is the variability in _sale price_
+
+
+
+
+### What is this?
+
+First, read the [VRGDA White Paper](https://www.paradigm.xyz/2022/08/vrgda).
+
+// TODO: describe how this works
+
+
+
+For more readingin on Martingale Correction, read about [Martingales](https://en.wikipedia.org/wiki/Martingale_(probability_theory).
+
 
 ## Blueprint
 
 ```ml
 lib
+├─ VRGDAs — https://github.com/transmissions11/VRGDAs
 ├─ forge-std — https://github.com/foundry-rs/forge-std
-├─ solmate — https://github.com/Rari-Capital/solmate
+├─ solmate — https://github.com/transmissions11/solmate
 scripts
-├─ Deploy.s.sol — Simple Deployment Script
+├─ Deploy.s.sol — Deployment Script
 src
-├─ Greeter — A Minimal Greeter Contract
+├─ MVRGDA — A Variable Rate Gradual Dutch Auction with Martingale Correction
 test
-└─ Greeter.t — Exhaustive Tests
+└─ ...
 ```
 
 
-## Development
-
-**Setup**
-```bash
-forge install
-```
-
-**Building**
-```bash
-forge build
-```
-
-**Testing**
-```bash
-forge test
-```
-
-**Deployment & Verification**
-
-Inside the [`utils/`](./utils/) directory are a few preconfigured scripts that can be used to deploy and verify contracts.
-
-Scripts take inputs from the cli, using silent mode to hide any sensitive information.
-
-_NOTE: These scripts are required to be _executable_ meaning they must be made executable by running `chmod +x ./utils/*`._
-
-_NOTE: these scripts will prompt you for the contract name and deployed addresses (when verifying). Also, they use the `-i` flag on `forge` to ask for your private key for deployment. This uses silent mode which keeps your private key from being printed to the console (and visible in logs)._
-
-
-### First time with Forge/Foundry?
-
-See the official Foundry installation [instructions](https://github.com/foundry-rs/foundry/blob/master/README.md#installation).
-
-Then, install the [foundry](https://github.com/foundry-rs/foundry) toolchain installer (`foundryup`) with:
-```bash
-curl -L https://foundry.paradigm.xyz | bash
-```
-
-Now that you've installed the `foundryup` binary,
-anytime you need to get the latest `forge` or `cast` binaries,
-you can run `foundryup`.
-
-So, simply execute:
-```bash
-foundryup
-```
-
-🎉 Foundry is installed! 🎉
-
-
-### Writing Tests with Foundry
-
-With [Foundry](https://github.com/foundry-rs/foundry), all tests are written in Solidity! 🥳
-
-Create a test file for your contract in the `test/` directory.
-
-For example, [`src/Greeter.sol`](./src/Greeter.sol) has its test file defined in [`./test/Greeter.t.sol`](./test/Greeter.t.sol).
-
-To learn more about writing tests in Solidity for Foundry, reference Rari Capital's [solmate](https://github.com/Rari-Capital/solmate/tree/main/src/test) repository created by [@transmissions11](https://twitter.com/transmissions11).
-
-
-### Configure Foundry
-
-Using [foundry.toml](./foundry.toml), Foundry is easily configurable.
-
-For a full list of configuration options, see the Foundry [configuration documentation](https://github.com/foundry-rs/foundry/blob/master/config/README.md#all-options).
 
 
 ## License
 
-[AGPL-3.0-only](https://github.com/abigger87/femplate/blob/master/LICENSE)
+[Unlicense](https://github.com/whitenois3/mvrgda/blob/master/LICENSE)
 
 
 ## Acknowledgements
 
 - [femplate](https://github.com/abigger87/femplate)
-- [foundry](https://github.com/foundry-rs/foundry)
-- [solmate](https://github.com/Rari-Capital/solmate)
-- [forge-std](https://github.com/brockelmore/forge-std)
-- [forge-template](https://github.com/foundry-rs/forge-template)
-- [foundry-toolchain](https://github.com/foundry-rs/foundry-toolchain)
+- [VRGDAs](https://github.com/transmissions11/VRGDAs)
 
 
 ## Disclaimer
